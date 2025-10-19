@@ -399,14 +399,14 @@ const about = (bot: Telegraf<Context>) => {
 const report = (bot: Telegraf<Context>) => {
   bot.command("report", async (ctx) => {
     await ctx.reply(
-      `🛠️ *Xatolik yuborish*\n\n` +
+      `🛠️ <b>Xatolik yuborish</b>\n\n` +
         `Agar botda xatolik yoki muammo ko'rsangiz, quyidagi ma'lumotlarni yuboring:\n\n` +
         `• Xatolik tavsifi\n` +
         `• Qaysi komanda ishlamayapti\n` +
         `• Screenshot (agar bo'lsa)\n\n` +
         `📧 Admin: @use_ict`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       }
     );
   });
