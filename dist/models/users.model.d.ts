@@ -5,6 +5,7 @@ interface IUser {
     first_name?: string;
     last_name?: string;
     viewed_memes?: mongoose.Types.ObjectId[];
+    language?: string;
 }
 declare const _default: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, mongoose.DefaultSchemaOptions> & IUser & {
     _id: mongoose.Types.ObjectId;

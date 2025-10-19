@@ -5,7 +5,8 @@ interface IUser {
     username?: string;
     first_name?: string;
     last_name?: string;
-    viewed_memes?: mongoose.Types.ObjectId[]
+    viewed_memes?: mongoose.Types.ObjectId[];
+    language?: string;
 }
 
 const schema = new mongoose.Schema<IUser>({
@@ -25,6 +26,11 @@ const schema = new mongoose.Schema<IUser>({
         type: [mongoose.Schema.Types.ObjectId],
         required: false,
         default: []
+    },
+    language: {
+        type: String,
+        required: false,
+        default: 'uz'
     }
 }, {timestamps: true});
 

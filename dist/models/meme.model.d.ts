@@ -9,8 +9,8 @@ interface IMeme {
     views: number;
     author: number | string;
     reactions: IReaction[];
-    up: number;
-    down: number;
+    up: number[];
+    down: number[];
 }
 declare const _default: mongoose.Model<IMeme, {}, {}, {}, mongoose.Document<unknown, {}, IMeme, {}, mongoose.DefaultSchemaOptions> & IMeme & {
     _id: mongoose.Types.ObjectId;

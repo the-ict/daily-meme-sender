@@ -16,6 +16,11 @@ const schema = new mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         required: false,
         default: []
+    },
+    language: {
+        type: String,
+        required: false,
+        default: 'uz'
     }
 }, { timestamps: true });
 export default mongoose.model("User", schema);

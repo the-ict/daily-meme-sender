@@ -11,8 +11,8 @@ interface IMeme {
   views: number;
   author: number | string;
   reactions: IReaction[];
-  up: number;
-  down: number;
+  up: number[];
+  down: number[];
 }
 
 const reactionSchema = new mongoose.Schema<IReaction>({
@@ -32,8 +32,14 @@ const schema = new mongoose.Schema<IMeme>({
     required: true,
   },
   reactions: [reactionSchema],
-  up: Number,
-  down: Number,
+  up: {
+    type: [String],
+    default: [],
+  },
+  down: {
+    type: [String],
+    default: [],
+  },
 });
 
 export default mongoose.model("Meme", schema);

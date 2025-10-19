@@ -6,7 +6,6 @@ import {
 import type { Context, Telegraf } from "telegraf";
 import usersModel from "../../models/users.model.js";
 import memeModel from "../../models/meme.model.js";
-import type mongoose from "mongoose";
 
 const start = (bot: Telegraf<Context>) => {
   bot.command("start", async (ctx) => {
@@ -63,7 +62,7 @@ const addMeme = (bot: Telegraf<Context>) => {
 
     try {
       const bestPhoto = await ctx.message.photo.pop();
-      const file = await ctx.telegram.getFileLink(bestPhoto?.file_id as string);
+      const file = bestPhoto?.file_id;
       const caption = ctx.message.caption;
 
       const meme = new memeModel({
@@ -71,8 +70,6 @@ const addMeme = (bot: Telegraf<Context>) => {
         caption: caption,
         views: 0,
         author: ctx.message.from.id,
-        up: 0,
-        down: 0,
         reactions: [
           {
             type: "smile",
@@ -140,8 +137,8 @@ const daily = (bot: Telegraf<Context>) => {
       reply_markup: {
         inline_keyboard: [
           [
-            { text: `👍 ${meme.up}`, callback_data: `up_${meme._id}` },
-            { text: `👎 ${meme.down}`, callback_data: `down_${meme._id}` },
+            { text: `👍 ${meme.up.length}`, callback_data: `up_${meme._id}` },
+            { text: `👎 ${meme.down.length}`, callback_data: `down_${meme._id}` }
           ],
         ],
       },
@@ -149,4 +146,4 @@ const daily = (bot: Telegraf<Context>) => {
   });
 };
 
-export { help, start, getTgId, addMeme };
+export { help, start, getTgId, addMeme, daily};

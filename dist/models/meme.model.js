@@ -15,8 +15,14 @@ const schema = new mongoose.Schema({
         required: true,
     },
     reactions: [reactionSchema],
-    up: Number,
-    down: Number,
+    up: {
+        type: [String],
+        default: [],
+    },
+    down: {
+        type: [String],
+        default: [],
+    },
 });
 export default mongoose.model("Meme", schema);
 //# sourceMappingURL=meme.model.js.map

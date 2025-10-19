@@ -1,5 +1,14 @@
 import type { Context } from "telegraf";
 
+export const MESSAGES = {
+  MEME_NOT_FOUND: "❌ Meme topilmadi!",
+  LIKE_ADDED: "👍 Like qo‘shildi!",
+  DISLIKE_ADDED: "👎 Dislike qo‘shildi!",
+  LIKE_REMOVED: "👍 Like olib tashlandi!",
+  DISLIKE_REMOVED: "👎 Dislike olib tashlandi!",
+  VOTE_ERROR: "❌ Ovoz berishda xatolik yuz berdi!",
+};
+
 const help_message = (ctx: Context) => `
 <b>🤖 MemeMaster Help Center</b>
 
