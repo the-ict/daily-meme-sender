@@ -32,7 +32,6 @@ Quyidagi komandalarni ishlatishing mumkin:
 /streak — Necha kundan beri memelarni ko‘rib kelayotganingni bilish  
 
 <b>⚙️ Foydali:</b>
-/language — Tilni o‘zgartirish 🌍  
 /about — Bot haqida ma’lumot ℹ️  
 /report — Xatolik yoki shikoyat yuborish 🛠️  
 

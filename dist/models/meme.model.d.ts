@@ -11,6 +11,8 @@ interface IMeme {
     reactions: IReaction[];
     up: number[];
     down: number[];
+    score: number;
+    mood?: string;
 }
 declare const _default: mongoose.Model<IMeme, {}, {}, {}, mongoose.Document<unknown, {}, IMeme, {}, mongoose.DefaultSchemaOptions> & IMeme & {
     _id: mongoose.Types.ObjectId;

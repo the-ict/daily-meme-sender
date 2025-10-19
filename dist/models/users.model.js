@@ -21,6 +21,11 @@ const schema = new mongoose.Schema({
         type: String,
         required: false,
         default: 'uz'
+    },
+    createdAt: {
+        type: Date,
+        required: true,
+        default: Date.now
     }
 }, { timestamps: true });
 export default mongoose.model("User", schema);

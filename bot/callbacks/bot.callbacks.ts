@@ -223,25 +223,24 @@ const moodCallback = (bot: Telegraf<Context>) => {
       }
 
       const mood = ctx.match[1] || "happy";
-      const moods = {
-        happy: ["funny", "cute", "positive"],
-        sad: ["emotional", "dark", "melancholy"],
-        angry: ["sarcastic", "rage", "intense"],
-        sleepy: ["relaxing", "calm", "chill"],
-      };
+      const userId = ctx.from?.id;
 
-      const moodKeywords = moods[mood as keyof typeof moods] || [];
+      if (!userId) {
+        return await ctx.answerCbQuery("Foydalanuvchi topilmadi!");
+      }
+
+      const user = await usersModel.findOne({ telegram_id: userId });
+      const viewedMemes = user?.viewed_memes || [];
+
       const memes = await memeModel
         .find({
-          $or: [
-            { caption: { $regex: moodKeywords.join("|"), $options: "i" } },
-            { reactions: { $elemMatch: { type: { $in: moodKeywords } } } },
-          ],
+          mood: mood,
+          _id: { $nin: viewedMemes }
         })
         .limit(10);
 
       if (memes.length === 0) {
-        return await ctx.answerCbQuery("Bu kayfiyat uchun meme topilmadi!");
+        return await ctx.answerCbQuery(`😔 ${mood} kayfiyati uchun yangi meme topilmadi!`);
       }
 
       const randomMeme = memes[Math.floor(Math.random() * memes.length)];
@@ -249,33 +248,103 @@ const moodCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery("Meme topilmadi!");
       }
 
-      await ctx.editMessageCaption(
-        `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${
-          randomMeme.caption || ""
-        }`,
-        {
-          parse_mode: "Markdown",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: `👍 ${randomMeme.up.length}`,
-                  callback_data: `up_${randomMeme._id}`,
-                },
-                {
-                  text: `👎 ${randomMeme.down.length}`,
-                  callback_data: `down_${randomMeme._id}`,
-                },
+      if (user && user.viewed_memes) {
+        user.viewed_memes.push(randomMeme._id);
+        await user.save();
+      }
+
+      if (typeof randomMeme.views === "number") {
+        randomMeme.views += 1;
+        await randomMeme.save();
+      }
+
+      try {
+        await ctx.editMessageCaption(
+          `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${
+            randomMeme.caption || ""
+          }\n\n👁 ${randomMeme.views} marta ko'rilgan`,
+          {
+            parse_mode: "Markdown",
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: `👍 ${randomMeme.up.length}`,
+                    callback_data: `up_${randomMeme._id}`,
+                  },
+                  {
+                    text: `👎 ${randomMeme.down.length}`,
+                    callback_data: `down_${randomMeme._id}`,
+                  },
+                ],
+                [
+                  { text: `🎭 Boshqa ${mood}`, callback_data: `mood_${mood}` },
+                  { text: `🔄 Boshqa kayfiyat`, callback_data: `change_mood` }
+                ],
               ],
-              [{ text: `🎭 Boshqa ${mood}`, callback_data: `mood_${mood}` }],
-            ],
-          },
+            },
+          }
+        );
+      } catch (editError: any) {
+        if (editError.message?.includes("there is no caption")) {
+          await ctx.editMessageText(
+            `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${
+              randomMeme.caption || ""
+            }\n\n👁 ${randomMeme.views} marta ko'rilgan`,
+            {
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: `👍 ${randomMeme.up.length}`,
+                      callback_data: `up_${randomMeme._id}`,
+                    },
+                    {
+                      text: `👎 ${randomMeme.down.length}`,
+                      callback_data: `down_${randomMeme._id}`,
+                    },
+                  ],
+                  [
+                    { text: `🎭 Boshqa ${mood}`, callback_data: `mood_${mood}` },
+                    { text: `🔄 Boshqa kayfiyat`, callback_data: `change_mood` }
+                  ],
+                ],
+              },
+            }
+          );
+        } else {
+          console.warn("Could not update message:", editError);
         }
-      );
+      }
 
       await ctx.answerCbQuery(`😊 ${mood} kayfiyati uchun meme!`);
     } catch (error) {
       console.error("Error in moodCallback:", error);
+      await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
+    }
+  });
+
+  bot.action('change_mood', async (ctx) => {
+    try {
+      await ctx.editMessageText("😊 Qaysi kayfiyatda memes ko'rmoqchisiz?", {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "😄 Happy", callback_data: "mood_happy" },
+              { text: "😢 Sad", callback_data: "mood_sad" }
+            ],
+            [
+              { text: "😡 Angry", callback_data: "mood_angry" },
+              { text: "😴 Sleepy", callback_data: "mood_sleepy" }
+            ]
+          ]
+        }
+      });
+
+      await ctx.answerCbQuery("Kayfiyat tanlandi!");
+    } catch (error) {
+      console.error('Error in change_mood:', error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
@@ -350,29 +419,59 @@ const randomCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery("Meme topilmadi!");
       }
 
-      await ctx.editMessageCaption(
-        `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
-          randomMeme.views
-        } marta ko'rilgan`,
-        {
-          parse_mode: "Markdown",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: `👍 ${randomMeme.up.length}`,
-                  callback_data: `up_${randomMeme._id}`,
-                },
-                {
-                  text: `👎 ${randomMeme.down.length}`,
-                  callback_data: `down_${randomMeme._id}`,
-                },
+      try {
+        await ctx.editMessageCaption(
+          `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+            randomMeme.views
+          } marta ko'rilgan`,
+          {
+            parse_mode: "Markdown",
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: `👍 ${randomMeme.up.length}`,
+                    callback_data: `up_${randomMeme._id}`,
+                  },
+                  {
+                    text: `👎 ${randomMeme.down.length}`,
+                    callback_data: `down_${randomMeme._id}`,
+                  },
+                ],
+                [{ text: `🎲 Yana tasodifiy`, callback_data: `random_meme` }],
               ],
-              [{ text: `🎲 Yana tasodifiy`, callback_data: `random_meme` }],
-            ],
-          },
+            },
+          }
+        );
+      } catch (editError: any) {
+        if (editError.message?.includes("there is no caption")) {
+          await ctx.editMessageText(
+            `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+              randomMeme.views
+            } marta ko'rilgan`,
+            {
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: `👍 ${randomMeme.up.length}`,
+                      callback_data: `up_${randomMeme._id}`,
+                    },
+                    {
+                      text: `👎 ${randomMeme.down.length}`,
+                      callback_data: `down_${randomMeme._id}`,
+                    },
+                  ],
+                  [{ text: `🎲 Yana tasodifiy`, callback_data: `random_meme` }],
+                ],
+              },
+            }
+          );
+        } else if (!editError.message?.includes("message is not modified")) {
+          console.warn("Could not update random meme:", editError);
         }
-      );
+      }
 
       await ctx.answerCbQuery("🎲 Tasodifiy meme!");
     } catch (error) {
@@ -395,25 +494,86 @@ const topMemesCallback = (bot: Telegraf<Context>) => {
       }
 
       let message = "🏆 *TOP 10 MEMES*\n\n";
+      const inlineKeyboard: any[] = [];
+
       topMemes.forEach((meme, index) => {
         message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${
           meme.down.length
         }\n`;
         message += `${meme.caption || "Meme"}\n\n`;
+
+        inlineKeyboard.push([
+          { text: `${index + 1}. Ko'rish`, callback_data: `view_meme_${meme._id}` }
+        ]);
       });
 
-      await ctx.editMessageText(message, {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "🔄 Yangilash", callback_data: "top_memes" }],
-          ],
-        },
-      });
+      inlineKeyboard.push([
+        { text: "🔄 Yangilash", callback_data: "top_memes" }
+      ]);
+
+      try {
+        await ctx.editMessageText(message, {
+          parse_mode: "Markdown",
+          reply_markup: {
+            inline_keyboard: inlineKeyboard
+          },
+        });
+      } catch (editError: any) {
+        if (!editError.message?.includes("message is not modified")) {
+          console.warn("Could not update top memes:", editError);
+        }
+      }
 
       await ctx.answerCbQuery("🏆 Top memes!");
     } catch (error) {
       console.error("Error in topMemesCallback:", error);
+      await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
+    }
+  });
+
+  bot.action(/^view_meme_(.+)$/, async (ctx) => {
+    try {
+      const memeId = ctx.match[1];
+
+      if (!memeId || !/^[a-f\d]{24}$/i.test(memeId)) {
+        return await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
+      }
+
+      const meme = await memeModel.findById(memeId);
+      if (!meme) {
+        return await ctx.answerCbQuery(MESSAGES.MEME_NOT_FOUND);
+      }
+
+      const userId = ctx.from?.id;
+      if (userId) {
+        const user = await usersModel.findOne({ telegram_id: userId });
+        if (user && user.viewed_memes) {
+          user.viewed_memes.push(meme._id);
+          await user.save();
+        }
+      }
+
+      if (typeof meme.views === "number") {
+        meme.views += 1;
+        await meme.save();
+      }
+
+      await ctx.replyWithPhoto(meme.image, {
+        caption: `🏆 *Top Meme*\n\n${meme.caption || ""}\n\n👁 ${meme.views} marta ko'rilgan`,
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: `👍 ${meme.up.length}`, callback_data: `up_${meme._id}` },
+              { text: `👎 ${meme.down.length}`, callback_data: `down_${meme._id}` }
+            ]
+          ]
+        }
+      });
+
+      await ctx.answerCbQuery("Meme yuborildi!");
+    } catch (error) {
+      console.error("Error in view_meme:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });

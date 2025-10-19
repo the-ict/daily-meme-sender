@@ -23,6 +23,15 @@ const schema = new mongoose.Schema({
         type: [String],
         default: [],
     },
+    score: {
+        type: Number,
+        default: 0,
+    },
+    mood: {
+        type: String,
+        required: false,
+        enum: ['happy', 'sad', 'angry', 'sleepy', 'neutral']
+    }
 });
 export default mongoose.model("Meme", schema);
 //# sourceMappingURL=meme.model.js.map

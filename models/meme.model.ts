@@ -13,6 +13,8 @@ interface IMeme {
   reactions: IReaction[];
   up: number[];
   down: number[];
+  score: number;
+  mood?: string;
 }
 
 const reactionSchema = new mongoose.Schema<IReaction>({
@@ -40,6 +42,15 @@ const schema = new mongoose.Schema<IMeme>({
     type: [String],
     default: [],
   },
+  score: {
+    type: Number,
+    default: 0,
+  },
+  mood: {
+    type: String,
+    required: false,
+    enum: ['happy', 'sad', 'angry', 'sleepy', 'neutral']
+  }
 });
 
 export default mongoose.model("Meme", schema);
