@@ -1,14 +1,19 @@
-import {Telegraf} from "telegraf"
+import { help, start, getTgId, addMeme } from "./bot/commands/bot.commands.js";
+import connect from "./config/database.config.js";
+import { Telegraf } from "telegraf"
 import dotenv from "dotenv"
+
 
 dotenv.config();
 
-console.log(process.env.TELEGRAM_TOKEN, 'telegram token')
-
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN as string);
+connect();
 
-bot.start(ctx => {
-    ctx.reply("Hello! I'm a bot that sends memes every day!");
-})
+// commands
+start(bot);
+help(bot);
+getTgId(bot);
+addMeme(bot);
 
-bot.launch();
+
+bot.launch().then(() => console.log("bot is running 🚀"));

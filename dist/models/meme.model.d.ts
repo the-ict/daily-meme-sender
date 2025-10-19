@@ -5,8 +5,7 @@ interface IReaction {
 }
 interface IMeme {
     image: string;
-    title: string;
-    description: string;
+    caption?: string;
     views: number;
     author: number | string;
     reactions: IReaction[];

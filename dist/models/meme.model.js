@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 const reactionSchema = new mongoose.Schema({
     type: { type: String, required: true },
-    count: { type: Number, required: true, default: 0 }
+    count: { type: Number, required: true, default: 0 },
 });
 const schema = new mongoose.Schema({
     image: String,
-    title: String,
-    description: String,
+    caption: {
+        type: String,
+        required: false,
+    },
     views: Number,
     author: {
         type: Number,

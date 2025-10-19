@@ -4,6 +4,7 @@ interface IUser {
     username?: string;
     first_name?: string;
     last_name?: string;
+    viewed_memes?: mongoose.Types.ObjectId[];
 }
 declare const _default: mongoose.Model<IUser, {}, {}, {}, mongoose.Document<unknown, {}, IUser, {}, mongoose.DefaultSchemaOptions> & IUser & {
     _id: mongoose.Types.ObjectId;

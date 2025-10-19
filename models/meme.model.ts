@@ -1,38 +1,39 @@
 import mongoose from "mongoose";
 
 interface IReaction {
-    type: string;
-    count: number;
+  type: string;
+  count: number;
 }
 
 interface IMeme {
-    image: string;
-    title: string;
-    description: string;
-    views: number;
-    author: number | string;
-    reactions: IReaction[];
-    up: number;
-    down: number;
+  image: string;
+  caption?: string;
+  views: number;
+  author: number | string;
+  reactions: IReaction[];
+  up: number;
+  down: number;
 }
 
 const reactionSchema = new mongoose.Schema<IReaction>({
-    type: { type: String, required: true },
-    count: { type: Number, required: true, default: 0 }
+  type: { type: String, required: true },
+  count: { type: Number, required: true, default: 0 },
 });
 
 const schema = new mongoose.Schema<IMeme>({
-    image: String,
-    title: String,
-    description: String,
-    views: Number,
-    author: {
-        type: Number,
-        required: true,
-    },
-    reactions: [reactionSchema],
-    up: Number,
-    down: Number,
-})
+  image: String,
+  caption: {
+    type: String,
+    required: false,
+  },
+  views: Number,
+  author: {
+    type: Number,
+    required: true,
+  },
+  reactions: [reactionSchema],
+  up: Number,
+  down: Number,
+});
 
 export default mongoose.model("Meme", schema);

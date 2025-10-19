@@ -11,7 +11,12 @@ const schema = new mongoose.Schema({
         unique: true,
     },
     first_name: String,
-    last_name: String
+    last_name: String,
+    viewed_memes: {
+        type: [mongoose.Schema.Types.ObjectId],
+        required: false,
+        default: []
+    }
 }, { timestamps: true });
 export default mongoose.model("User", schema);
 //# sourceMappingURL=users.model.js.map
