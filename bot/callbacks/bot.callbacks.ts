@@ -10,7 +10,7 @@ const upDownCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
       }
 
-      const action = ctx.match[1] as 'up' | 'down';
+      const action = ctx.match[1] as "up" | "down";
       const memeId = ctx.match[2];
       const userId = ctx.from.id;
 
@@ -31,19 +31,53 @@ const upDownCallback = (bot: Telegraf<Context>) => {
       if (isUpvoted) {
         updateQuery.$pull = { up: userId };
         await memeModel.findByIdAndUpdate(memeId, updateQuery);
+        const updatedMeme = await memeModel.findById(memeId);
+        if (updatedMeme) {
+          try {
+            await ctx.editMessageReplyMarkup({
+              inline_keyboard: [
+                [
+                  { text: `👍 ${updatedMeme.up.length}`, callback_data: `up_${memeId}` },
+                  { text: `👎 ${updatedMeme.down.length}`, callback_data: `down_${memeId}` },
+                ],
+              ],
+            });
+          } catch (editError: any) {
+            if (!editError.message?.includes("message is not modified")) {
+              console.warn("Could not update inline keyboard:", editError);
+            }
+          }
+        }
         return await ctx.answerCbQuery(MESSAGES.LIKE_REMOVED);
       } else if (isDownvoted) {
         updateQuery.$pull = { down: userId };
         await memeModel.findByIdAndUpdate(memeId, updateQuery);
+        const updatedMeme = await memeModel.findById(memeId);
+        if (updatedMeme) {
+          try {
+            await ctx.editMessageReplyMarkup({
+              inline_keyboard: [
+                [
+                  { text: `👍 ${updatedMeme.up.length}`, callback_data: `up_${memeId}` },
+                  { text: `👎 ${updatedMeme.down.length}`, callback_data: `down_${memeId}` },
+                ],
+              ],
+            });
+          } catch (editError: any) {
+            if (!editError.message?.includes("message is not modified")) {
+              console.warn("Could not update inline keyboard:", editError);
+            }
+          }
+        }
         return await ctx.answerCbQuery(MESSAGES.DISLIKE_REMOVED);
       }
 
-      if (action === 'up') {
+      if (action === "up") {
         updateQuery.$addToSet = { up: userId };
-        updateQuery.$pull = { down: userId }; 
+        updateQuery.$pull = { down: userId };
       } else {
         updateQuery.$addToSet = { down: userId };
-        updateQuery.$pull = { up: userId }; 
+        updateQuery.$pull = { up: userId };
       }
 
       await memeModel.findByIdAndUpdate(memeId, updateQuery);
@@ -57,22 +91,28 @@ const upDownCallback = (bot: Telegraf<Context>) => {
         await ctx.editMessageReplyMarkup({
           inline_keyboard: [
             [
-              { text: `👍 ${updatedMeme.up.length}`, callback_data: `up_${memeId}` },
-              { text: `👎 ${updatedMeme.down.length}`, callback_data: `down_${memeId}` },
+              {
+                text: `👍 ${updatedMeme.up.length}`,
+                callback_data: `up_${memeId}`,
+              },
+              {
+                text: `👎 ${updatedMeme.down.length}`,
+                callback_data: `down_${memeId}`,
+              },
             ],
           ],
         });
       } catch (editError: any) {
-        if (!editError.message?.includes('message is not modified')) {
-          console.warn('Could not update inline keyboard:', editError);
+        if (!editError.message?.includes("message is not modified")) {
+          console.warn("Could not update inline keyboard:", editError);
         }
       }
 
       await ctx.answerCbQuery(
-        action === 'up' ? MESSAGES.LIKE_ADDED : MESSAGES.DISLIKE_ADDED
+        action === "up" ? MESSAGES.LIKE_ADDED : MESSAGES.DISLIKE_ADDED
       );
     } catch (error) {
-      console.error('Error in upDownCallback:', error);
+      console.error("Error in upDownCallback:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
@@ -83,13 +123,18 @@ const battleCallback = (bot: Telegraf<Context>) => {
     try {
       const [meme1Id, meme2Id] = ctx.match.slice(1, 3);
 
-      if (!meme1Id || !meme2Id || !/^[a-f\d]{24}$/i.test(meme1Id) || !/^[a-f\d]{24}$/i.test(meme2Id)) {
+      if (
+        !meme1Id ||
+        !meme2Id ||
+        !/^[a-f\d]{24}$/i.test(meme1Id) ||
+        !/^[a-f\d]{24}$/i.test(meme2Id)
+      ) {
         return await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
       }
 
       const [meme1, meme2] = await Promise.all([
         memeModel.findById(meme1Id),
-        memeModel.findById(meme2Id)
+        memeModel.findById(meme2Id),
       ]);
 
       if (!meme1 || !meme2) {
@@ -100,30 +145,28 @@ const battleCallback = (bot: Telegraf<Context>) => {
       const loser = winner === meme1 ? meme2 : meme1;
 
       await ctx.editMessageCaption(
-        `🏆 *G'olib:* ${winner.caption || 'Meme'}\n\n` +
-        `👍 ${winner.up.length} | 👎 ${winner.down.length}\n\n` +
-        `💔 *Mag'lub:* ${loser.caption || 'Meme'}\n\n` +
-        `👍 ${loser.up.length} | 👎 ${loser.down.length}`,
+        `🏆 *G'olib:* ${winner.caption || "Meme"}\n\n` +
+          `👍 ${winner.up.length} | 👎 ${winner.down.length}\n\n` +
+          `💔 *Mag'lub:* ${loser.caption || "Meme"}\n\n` +
+          `👍 ${loser.up.length} | 👎 ${loser.down.length}`,
         {
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
-              [
-                { text: `🔄 Yangi Battle`, callback_data: `new_battle` }
-              ]
-            ]
-          }
+              [{ text: `🔄 Yangi Battle`, callback_data: `new_battle` }],
+            ],
+          },
         }
       );
 
       await ctx.answerCbQuery("⚔️ Jang tugadi!");
     } catch (error) {
-      console.error('Error in battleCallback:', error);
+      console.error("Error in battleCallback:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
 
-  bot.action('new_battle', async (ctx) => {
+  bot.action("new_battle", async (ctx) => {
     try {
       const memes = await memeModel.find({}).limit(50);
       if (memes.length < 2) {
@@ -140,27 +183,33 @@ const battleCallback = (bot: Telegraf<Context>) => {
 
       await ctx.editMessageCaption(
         `⚔️ *Meme Battle!*\n\n` +
-        `1️⃣ ${meme1.caption || 'Meme 1'}\n` +
-        `👍 ${meme1.up.length} | 👎 ${meme1.down.length}\n\n` +
-        `2️⃣ ${meme2.caption || 'Meme 2'}\n` +
-        `👍 ${meme2.up.length} | 👎 ${meme2.down.length}\n\n` +
-        `Kim g'olib bo'ladi?`,
+          `1️⃣ ${meme1.caption || "Meme 1"}\n` +
+          `👍 ${meme1.up.length} | 👎 ${meme1.down.length}\n\n` +
+          `2️⃣ ${meme2.caption || "Meme 2"}\n` +
+          `👍 ${meme2.up.length} | 👎 ${meme2.down.length}\n\n` +
+          `Kim g'olib bo'ladi?`,
         {
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
               [
-                { text: `1️⃣`, callback_data: `battle_${meme1._id}_${meme2._id}` },
-                { text: `2️⃣`, callback_data: `battle_${meme2._id}_${meme1._id}` }
-              ]
-            ]
-          }
+                {
+                  text: `1️⃣`,
+                  callback_data: `battle_${meme1._id}_${meme2._id}`,
+                },
+                {
+                  text: `2️⃣`,
+                  callback_data: `battle_${meme2._id}_${meme1._id}`,
+                },
+              ],
+            ],
+          },
         }
       );
 
       await ctx.answerCbQuery("⚔️ Jang boshlandi!");
     } catch (error) {
-      console.error('Error in new_battle:', error);
+      console.error("Error in new_battle:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
@@ -173,21 +222,23 @@ const moodCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
       }
 
-      const mood = ctx.match[1] || 'happy';
+      const mood = ctx.match[1] || "happy";
       const moods = {
-        happy: ['funny', 'cute', 'positive'],
-        sad: ['emotional', 'dark', 'melancholy'],
-        angry: ['sarcastic', 'rage', 'intense'],
-        sleepy: ['relaxing', 'calm', 'chill']
+        happy: ["funny", "cute", "positive"],
+        sad: ["emotional", "dark", "melancholy"],
+        angry: ["sarcastic", "rage", "intense"],
+        sleepy: ["relaxing", "calm", "chill"],
       };
 
       const moodKeywords = moods[mood as keyof typeof moods] || [];
-      const memes = await memeModel.find({
-        $or: [
-          { caption: { $regex: moodKeywords.join('|'), $options: 'i' } },
-          { reactions: { $elemMatch: { type: { $in: moodKeywords } } } }
-        ]
-      }).limit(10);
+      const memes = await memeModel
+        .find({
+          $or: [
+            { caption: { $regex: moodKeywords.join("|"), $options: "i" } },
+            { reactions: { $elemMatch: { type: { $in: moodKeywords } } } },
+          ],
+        })
+        .limit(10);
 
       if (memes.length === 0) {
         return await ctx.answerCbQuery("Bu kayfiyat uchun meme topilmadi!");
@@ -199,26 +250,32 @@ const moodCallback = (bot: Telegraf<Context>) => {
       }
 
       await ctx.editMessageCaption(
-        `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${randomMeme.caption || ''}`,
+        `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${
+          randomMeme.caption || ""
+        }`,
         {
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
               [
-                { text: `👍 ${randomMeme.up.length}`, callback_data: `up_${randomMeme._id}` },
-                { text: `👎 ${randomMeme.down.length}`, callback_data: `down_${randomMeme._id}` }
+                {
+                  text: `👍 ${randomMeme.up.length}`,
+                  callback_data: `up_${randomMeme._id}`,
+                },
+                {
+                  text: `👎 ${randomMeme.down.length}`,
+                  callback_data: `down_${randomMeme._id}`,
+                },
               ],
-              [
-                { text: `🎭 Boshqa ${mood}`, callback_data: `mood_${mood}` }
-              ]
-            ]
-          }
+              [{ text: `🎭 Boshqa ${mood}`, callback_data: `mood_${mood}` }],
+            ],
+          },
         }
       );
 
       await ctx.answerCbQuery(`😊 ${mood} kayfiyati uchun meme!`);
     } catch (error) {
-      console.error('Error in moodCallback:', error);
+      console.error("Error in moodCallback:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
@@ -247,35 +304,41 @@ const languageCallback = (bot: Telegraf<Context>) => {
       const langNames = {
         uz: "O'zbek",
         ru: "Русский",
-        en: "English"
+        en: "English",
       };
 
       await ctx.editMessageText(
-        `🌍 Til ${langNames[lang as keyof typeof langNames] || lang}ga o'zgartirildi!\n\n` +
-        `Til o'zgarishi keyingi xabarlardan boshlab amal qiladi.`,
+        `🌍 Til ${
+          langNames[lang as keyof typeof langNames] || lang
+        }ga o'zgartirildi!\n\n` +
+          `Til o'zgarishi keyingi xabarlardan boshlab amal qiladi.`,
         {
           reply_markup: {
             inline_keyboard: [
               [
                 { text: "🇺🇿 O'zbek", callback_data: "lang_uz" },
                 { text: "🇷🇺 Русский", callback_data: "lang_ru" },
-                { text: "🇺🇸 English", callback_data: "lang_en" }
-              ]
-            ]
-          }
+                { text: "🇺🇸 English", callback_data: "lang_en" },
+              ],
+            ],
+          },
         }
       );
 
-      await ctx.answerCbQuery(`🌍 Til ${langNames[lang as keyof typeof langNames] || lang}ga o'zgartirildi!`);
+      await ctx.answerCbQuery(
+        `🌍 Til ${
+          langNames[lang as keyof typeof langNames] || lang
+        }ga o'zgartirildi!`
+      );
     } catch (error) {
-      console.error('Error in languageCallback:', error);
+      console.error("Error in languageCallback:", error);
       await ctx.answerCbQuery("Til o'zgartirishda xatolik!");
     }
   });
 };
 
 const randomCallback = (bot: Telegraf<Context>) => {
-  bot.action('random_meme', async (ctx) => {
+  bot.action("random_meme", async (ctx) => {
     try {
       const memes = await memeModel.find({}).limit(100);
       if (memes.length === 0) {
@@ -288,36 +351,43 @@ const randomCallback = (bot: Telegraf<Context>) => {
       }
 
       await ctx.editMessageCaption(
-        `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ''}\n\n👁 ${randomMeme.views} marta ko'rilgan`,
+        `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+          randomMeme.views
+        } marta ko'rilgan`,
         {
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
               [
-                { text: `👍 ${randomMeme.up.length}`, callback_data: `up_${randomMeme._id}` },
-                { text: `👎 ${randomMeme.down.length}`, callback_data: `down_${randomMeme._id}` }
+                {
+                  text: `👍 ${randomMeme.up.length}`,
+                  callback_data: `up_${randomMeme._id}`,
+                },
+                {
+                  text: `👎 ${randomMeme.down.length}`,
+                  callback_data: `down_${randomMeme._id}`,
+                },
               ],
-              [
-                { text: `🎲 Yana tasodifiy`, callback_data: `random_meme` }
-              ]
-            ]
-          }
+              [{ text: `🎲 Yana tasodifiy`, callback_data: `random_meme` }],
+            ],
+          },
         }
       );
 
       await ctx.answerCbQuery("🎲 Tasodifiy meme!");
     } catch (error) {
-      console.error('Error in randomCallback:', error);
+      console.error("Error in randomCallback:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
 };
 
 const topMemesCallback = (bot: Telegraf<Context>) => {
-  bot.action('top_memes', async (ctx) => {
+  bot.action("top_memes", async (ctx) => {
     try {
-      const topMemes = await memeModel.find({})
-        .sort({ 'up.length': -1 })
+      const topMemes = await memeModel
+        .find({})
+        .sort({ "up.length": -1 })
         .limit(10);
 
       if (topMemes.length === 0) {
@@ -326,27 +396,34 @@ const topMemesCallback = (bot: Telegraf<Context>) => {
 
       let message = "🏆 *TOP 10 MEMES*\n\n";
       topMemes.forEach((meme, index) => {
-        message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${meme.down.length}\n`;
-        message += `${meme.caption || 'Meme'}\n\n`;
+        message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${
+          meme.down.length
+        }\n`;
+        message += `${meme.caption || "Meme"}\n\n`;
       });
 
       await ctx.editMessageText(message, {
         parse_mode: "Markdown",
         reply_markup: {
           inline_keyboard: [
-            [
-              { text: "🔄 Yangilash", callback_data: "top_memes" }
-            ]
-          ]
-        }
+            [{ text: "🔄 Yangilash", callback_data: "top_memes" }],
+          ],
+        },
       });
 
       await ctx.answerCbQuery("🏆 Top memes!");
     } catch (error) {
-      console.error('Error in topMemesCallback:', error);
+      console.error("Error in topMemesCallback:", error);
       await ctx.answerCbQuery(MESSAGES.VOTE_ERROR);
     }
   });
 };
 
-export { upDownCallback, battleCallback, moodCallback, languageCallback, randomCallback, topMemesCallback };
+export {
+  upDownCallback,
+  battleCallback,
+  moodCallback,
+  languageCallback,
+  randomCallback,
+  topMemesCallback,
+};
