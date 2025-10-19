@@ -15,6 +15,7 @@ interface IMeme {
   down: number[];
   score: number;
   mood?: string;
+  sent?: boolean;
 }
 
 const reactionSchema = new mongoose.Schema<IReaction>({
@@ -50,6 +51,10 @@ const schema = new mongoose.Schema<IMeme>({
     type: String,
     required: false,
     enum: ['happy', 'sad', 'angry', 'sleepy', 'neutral']
+  },
+  sent: {
+    type: Boolean,
+    default: false,
   }
 });
 

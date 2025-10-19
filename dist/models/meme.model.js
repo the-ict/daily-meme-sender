@@ -31,6 +31,10 @@ const schema = new mongoose.Schema({
         type: String,
         required: false,
         enum: ['happy', 'sad', 'angry', 'sleepy', 'neutral']
+    },
+    sent: {
+        type: Boolean,
+        default: false,
     }
 });
 export default mongoose.model("Meme", schema);

@@ -13,6 +13,7 @@ interface IMeme {
     down: number[];
     score: number;
     mood?: string;
+    sent?: boolean;
 }
 declare const _default: mongoose.Model<IMeme, {}, {}, {}, mongoose.Document<unknown, {}, IMeme, {}, mongoose.DefaultSchemaOptions> & IMeme & {
     _id: mongoose.Types.ObjectId;
