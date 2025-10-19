@@ -1,0 +1,20 @@
+import mongoose from "mongoose";
+const reactionSchema = new mongoose.Schema({
+    type: { type: String, required: true },
+    count: { type: Number, required: true, default: 0 }
+});
+const schema = new mongoose.Schema({
+    image: String,
+    title: String,
+    description: String,
+    views: Number,
+    author: {
+        type: Number,
+        required: true,
+    },
+    reactions: [reactionSchema],
+    up: Number,
+    down: Number,
+});
+export default mongoose.model("Meme", schema);
+//# sourceMappingURL=meme.model.js.map

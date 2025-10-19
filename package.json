@@ -1,0 +1,25 @@
+{
+  "name": "daily-meme-bot",
+  "version": "1.0.0",
+  "description": "The bot that sends memes every day!",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon dist/index.js",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "keywords": [],
+  "author": "Davlatbek Muxammadjonov",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "mongoose": "^8.19.1",
+    "telegraf": "^4.16.3",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.8.1",
+    "nodemon": "^3.1.10"
+  }
+}
