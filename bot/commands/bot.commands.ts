@@ -42,7 +42,7 @@ const help = (bot: Telegraf<Context>) => {
 const getTgId = (bot: Telegraf<Context>) => {
   bot.command("gimme", (ctx) => {
     ctx.reply(`📬 *Sening Telegram ID'ing:* \`${ctx.message.from.id}\``, {
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
     });
   });
 };
@@ -54,7 +54,7 @@ const addMeme = (bot: Telegraf<Context>) => {
         "Misol: 'happy meme' yoki 'sad story'\n\n" +
         "Mavjud moodlar: happy, sad, angry, sleepy, neutral",
       {
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       }
     );
   });
@@ -94,9 +94,9 @@ const addMeme = (bot: Telegraf<Context>) => {
       await ctx.reply(
         `✅ Meme saqlandi!\n\n` +
           `🆔 \`${meme._id}\`\n` +
-          `📸 ${meme.caption || "Mavjud emas!"}\n` +
+          `📸 ${meme.caption ? meme.caption.replace(/[<>]/g, '') : "Mavjud emas!"}\n` +
           `😊 Mood: ${mood}`,
-        { parse_mode: "Markdown" }
+        { parse_mode: "HTML" }
       );
     } catch (error) {
       console.error(error);
@@ -145,7 +145,7 @@ const daily = (bot: Telegraf<Context>) => {
     }
 
     await ctx.replyWithPhoto(meme.image, {
-      caption: `🧠 ${meme.caption || ""}\n\n👁 ${meme.views} marta ko‘rildi`,
+      caption: `🧠 ${meme.caption ? meme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${meme.views} marta ko‘rildi`,
       reply_markup: {
         inline_keyboard: [
           [
@@ -169,6 +169,7 @@ const battle = (bot: Telegraf<Context>) => {
     }
 
     const shuffledMemes = memes.sort(() => Math.random() - 0.5);
+    console.log(shuffledMemes);
     const meme1 = shuffledMemes[0];
     const meme2 = shuffledMemes[1];
 
@@ -177,14 +178,13 @@ const battle = (bot: Telegraf<Context>) => {
     }
 
     await ctx.replyWithPhoto(meme1.image, {
-      caption:
-        `⚔️ *Meme Battle!*\n\n` +
-        `1️⃣ ${meme1.caption || "Meme 1"}\n` +
-        `👍 ${meme1.up.length} | 👎 ${meme1.down.length}\n\n` +
-        `2️⃣ ${meme2.caption || "Meme 2"}\n` +
-        `👍 ${meme2.up.length} | 👎 ${meme2.down.length}\n\n` +
-        `Kim g'olib bo'ladi?`,
-      parse_mode: "Markdown",
+      caption: `1️⃣ ${meme1.caption || "Meme 1"}\n👍 ${meme1.up.length} | 👎 ${meme1.down.length}`,
+      parse_mode: "HTML",
+    });
+
+    await ctx.replyWithPhoto(meme2.image, {
+      caption: `2️⃣ ${meme2.caption || "Meme 2"}\n👍 ${meme2.up.length} | 👎 ${meme2.down.length}`,
+      parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
@@ -221,7 +221,7 @@ const mood = (bot: Telegraf<Context>) => {
     await ctx.reply(
       `😊 Qaysi kayfiyatda memes ko'rmoqchisiz?\n\n📊 *Mood statistikasi:*\n${statsText}`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
             [
@@ -268,10 +268,10 @@ const random = (bot: Telegraf<Context>) => {
     }
 
     await ctx.replyWithPhoto(randomMeme.image, {
-      caption: `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+      caption: `🎲 Tasodifiy meme:\n\n${randomMeme.caption ? randomMeme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${
         randomMeme.views
       } marta ko'rilgan`,
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: [
           [
@@ -309,7 +309,7 @@ const top = (bot: Telegraf<Context>) => {
       message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${
         meme.down.length
       }\n`;
-      message += `${meme.caption || "Meme"}\n\n`;
+      message += `${meme.caption ? meme.caption.replace(/[<>]/g, '') : "Meme"}\n\n`;
 
       inlineKeyboard.push([
         { text: `${index + 1}. Ko'rish`, callback_data: `view_meme_${meme._id}` }
@@ -321,7 +321,7 @@ const top = (bot: Telegraf<Context>) => {
     ]);
 
     await ctx.reply(message, {
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
       reply_markup: {
         inline_keyboard: inlineKeyboard
       },
@@ -342,16 +342,16 @@ const mymemes = (bot: Telegraf<Context>) => {
       return await ctx.reply("😢 Sizda hali meme yo'q!");
     }
 
-    let message = "🖼️ *Sizning memelaringiz:*\n\n";
+    let message = "🖼️ <b>Sizning memelaringiz:</b>\n\n";
     userMemes.forEach((meme, index) => {
       message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${
         meme.down.length
       } | 👁 ${meme.views}\n`;
-      message += `${meme.caption || "Meme"}\n\n`;
+      message += `${meme.caption ? meme.caption.replace(/[<>]/g, '') : "Meme"}\n\n`;
     });
 
     await ctx.reply(message, {
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
     });
   });
 };
@@ -374,7 +374,7 @@ const streak = (bot: Telegraf<Context>) => {
       `🔥 *Sizning streak'ingiz:* ${diffDays}\n\n` +
         `Har kuni meme ko'rib, streak'ingizni oshiring!`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       }
     );
   });
@@ -383,14 +383,14 @@ const streak = (bot: Telegraf<Context>) => {
 const about = (bot: Telegraf<Context>) => {
   bot.command("about", async (ctx) => {
     await ctx.reply(
-      `🤖 *MemeMaster Bot*\n\n` +
+      `🤖 <b>MemeMaster Bot</b>\n\n` +
         `Versiya: 1.0.0\n` +
         `Til: TypeScript\n` +
         `Framework: Telegraf\n\n` +
         `Bu bot har kuni yangi memelar taqdim etadi va foydalanuvchilarga meme baholash imkoniyatini beradi.\n\n` +
         `📞 Admin: @use_ict`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       }
     );
   });

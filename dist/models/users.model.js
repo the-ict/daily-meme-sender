@@ -7,8 +7,7 @@ const schema = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
     },
     first_name: String,
     last_name: String,

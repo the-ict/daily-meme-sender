@@ -18,8 +18,7 @@ const schema = new mongoose.Schema<IUser>({
     },
     username: {
         type: String,
-        required: true,
-        unique: true,
+        required: false,
     },
     first_name: String,
     last_name: String,

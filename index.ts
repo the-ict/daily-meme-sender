@@ -80,8 +80,8 @@ cron.schedule("0 8 * * *", async () => {
     for (const user of users) {
       try {
         await bot.telegram.sendPhoto(user.telegram_id, unsentMeme.image, {
-          caption: `🌅 *Kunlik Meme!*\n\n${unsentMeme.caption || ""}\n\n👁 ${unsentMeme.views} marta ko'rilgan`,
-          parse_mode: "Markdown",
+          caption: `🌅 <b>Kunlik Meme!</b>\n\n${unsentMeme.caption ? unsentMeme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${unsentMeme.views} marta ko'rilgan`,
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
               [

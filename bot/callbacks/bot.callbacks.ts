@@ -145,12 +145,12 @@ const battleCallback = (bot: Telegraf<Context>) => {
       const loser = winner === meme1 ? meme2 : meme1;
 
       await ctx.editMessageCaption(
-        `🏆 *G'olib:* ${winner.caption || "Meme"}\n\n` +
+        `🏆 <b>G'olib:</b> ${winner.caption || "Meme"}\n\n` +
           `👍 ${winner.up.length} | 👎 ${winner.down.length}\n\n` +
-          `💔 *Mag'lub:* ${loser.caption || "Meme"}\n\n` +
+          `💔 <b>Mag'lub:</b> ${loser.caption || "Meme"}\n\n` +
           `👍 ${loser.up.length} | 👎 ${loser.down.length}`,
         {
-          parse_mode: "Markdown",
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [
               [{ text: `🔄 Yangi Battle`, callback_data: `new_battle` }],
@@ -181,31 +181,29 @@ const battleCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery("Yetarli meme yo'q!");
       }
 
-      await ctx.editMessageCaption(
-        `⚔️ *Meme Battle!*\n\n` +
-          `1️⃣ ${meme1.caption || "Meme 1"}\n` +
-          `👍 ${meme1.up.length} | 👎 ${meme1.down.length}\n\n` +
-          `2️⃣ ${meme2.caption || "Meme 2"}\n` +
-          `👍 ${meme2.up.length} | 👎 ${meme2.down.length}\n\n` +
-          `Kim g'olib bo'ladi?`,
-        {
-          parse_mode: "Markdown",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: `1️⃣`,
-                  callback_data: `battle_${meme1._id}_${meme2._id}`,
-                },
-                {
-                  text: `2️⃣`,
-                  callback_data: `battle_${meme2._id}_${meme1._id}`,
-                },
-              ],
+      await ctx.replyWithPhoto(meme1.image, {
+        caption: `1️⃣ ${meme1.caption || "Meme 1"}\n👍 ${meme1.up.length} | 👎 ${meme1.down.length}`,
+        parse_mode: "HTML",
+      });
+
+      await ctx.replyWithPhoto(meme2.image, {
+        caption: `2️⃣ ${meme2.caption || "Meme 2"}\n👍 ${meme2.up.length} | 👎 ${meme2.down.length}`,
+        parse_mode: "HTML",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: `1️⃣`,
+                callback_data: `battle_${meme1._id}_${meme2._id}`,
+              },
+              {
+                text: `2️⃣`,
+                callback_data: `battle_${meme2._id}_${meme1._id}`,
+              },
             ],
-          },
-        }
-      );
+          ],
+        },
+      });
 
       await ctx.answerCbQuery("⚔️ Jang boshlandi!");
     } catch (error) {
@@ -244,12 +242,12 @@ const moodCallback = (bot: Telegraf<Context>) => {
       }
 
       // Create numbered list of memes
-      let message = `😊 *${mood.toUpperCase()}* kayfiyati uchun memelar:\n\n`;
+      let message = `😊 <b>${mood.toUpperCase()}</b> kayfiyati uchun memelar:\n\n`;
       const inlineKeyboard: any[] = [];
 
       memes.forEach((meme, index) => {
         message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${meme.down.length}\n`;
-        message += `${meme.caption || "Meme"}\n\n`;
+        message += `${meme.caption ? meme.caption.replace(/[<>]/g, '') : "Meme"}\n\n`;
 
         inlineKeyboard.push([
           { text: `${index + 1}`, callback_data: `mood_meme_${mood}_${index}` }
@@ -262,7 +260,7 @@ const moodCallback = (bot: Telegraf<Context>) => {
 
       try {
         await ctx.editMessageCaption(message, {
-          parse_mode: "Markdown",
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: inlineKeyboard
           },
@@ -270,7 +268,7 @@ const moodCallback = (bot: Telegraf<Context>) => {
       } catch (editError: any) {
         if (editError.message?.includes("there is no caption")) {
           await ctx.editMessageText(message, {
-            parse_mode: "Markdown",
+            parse_mode: "HTML",
             reply_markup: {
               inline_keyboard: inlineKeyboard
             },
@@ -336,8 +334,8 @@ const moodCallback = (bot: Telegraf<Context>) => {
 
       // Send the meme
       await ctx.replyWithPhoto(selectedMeme.image, {
-        caption: `😊 *${mood.toUpperCase()}* kayfiyati uchun meme:\n\n${selectedMeme.caption || ""}\n\n👁 ${selectedMeme.views} marta ko'rilgan`,
-        parse_mode: "Markdown",
+        caption: `😊 <b>${mood.toUpperCase()}</b> kayfiyati uchun meme:\n\n${selectedMeme.caption ? selectedMeme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${selectedMeme.views} marta ko'rilgan`,
+        parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
             [
@@ -455,11 +453,11 @@ const randomCallback = (bot: Telegraf<Context>) => {
 
       try {
         await ctx.editMessageCaption(
-          `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+          `🎲 Tasodifiy meme:\n\n${randomMeme.caption ? randomMeme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${
             randomMeme.views
           } marta ko'rilgan`,
           {
-            parse_mode: "Markdown",
+            parse_mode: "HTML",
             reply_markup: {
               inline_keyboard: [
                 [
@@ -480,11 +478,11 @@ const randomCallback = (bot: Telegraf<Context>) => {
       } catch (editError: any) {
         if (editError.message?.includes("there is no caption")) {
           await ctx.editMessageText(
-            `🎲 Tasodifiy meme:\n\n${randomMeme.caption || ""}\n\n👁 ${
+            `🎲 Tasodifiy meme:\n\n${randomMeme.caption ? randomMeme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${
               randomMeme.views
             } marta ko'rilgan`,
             {
-              parse_mode: "Markdown",
+              parse_mode: "HTML",
               reply_markup: {
                 inline_keyboard: [
                   [
@@ -527,14 +525,14 @@ const topMemesCallback = (bot: Telegraf<Context>) => {
         return await ctx.answerCbQuery("Meme topilmadi!");
       }
 
-      let message = "🏆 *TOP 10 MEMES*\n\n";
+      let message = "🏆 <b>TOP 10 MEMES</b>\n\n";
       const inlineKeyboard: any[] = [];
 
       topMemes.forEach((meme, index) => {
         message += `${index + 1}. 👍 ${meme.up.length} | 👎 ${
           meme.down.length
         }\n`;
-        message += `${meme.caption || "Meme"}\n\n`;
+        message += `${meme.caption ? meme.caption.replace(/[<>]/g, '') : "Meme"}\n\n`;
 
         inlineKeyboard.push([
           { text: `${index + 1}. Ko'rish`, callback_data: `view_meme_${meme._id}` }
@@ -547,7 +545,7 @@ const topMemesCallback = (bot: Telegraf<Context>) => {
 
       try {
         await ctx.editMessageText(message, {
-          parse_mode: "Markdown",
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: inlineKeyboard
           },
@@ -593,8 +591,8 @@ const topMemesCallback = (bot: Telegraf<Context>) => {
       }
 
       await ctx.replyWithPhoto(meme.image, {
-        caption: `🏆 *Top Meme*\n\n${meme.caption || ""}\n\n👁 ${meme.views} marta ko'rilgan`,
-        parse_mode: "Markdown",
+        caption: `🏆 <b>Top Meme</b>\n\n${meme.caption ? meme.caption.replace(/[<>]/g, '') : ""}\n\n👁 ${meme.views} marta ko'rilgan`,
+        parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
             [
