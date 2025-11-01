@@ -21,7 +21,6 @@ import {
   upDownCallback,
   battleCallback,
   moodCallback,
-  languageCallback,
   randomCallback,
   topMemesCallback
 } from "./bot/callbacks/bot.callbacks.js";
