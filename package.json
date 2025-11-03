@@ -5,15 +5,18 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon dist/index.js",
+    "start": "node dist/index.js",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "dev": "nodemon dist/index.js"
   },
   "keywords": [],
   "author": "Davlatbek Muxammadjonov",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^5.0.5",
     "dotenv": "^17.2.3",
+    "express": "^5.1.0",
     "mongoose": "^8.19.1",
     "node-cron": "^3.0.3",
     "telegraf": "^4.16.3",
