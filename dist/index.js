@@ -2,7 +2,7 @@ import { help, start, getTgId, addMeme, daily, battle, mood, language, random, t
 import connect from "./config/database.config.js";
 import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
-import { upDownCallback, battleCallback, moodCallback, languageCallback, randomCallback, topMemesCallback } from "./bot/callbacks/bot.callbacks.js";
+import { upDownCallback, battleCallback, moodCallback, randomCallback, topMemesCallback } from "./bot/callbacks/bot.callbacks.js";
 import cron from "node-cron";
 import usersModel from "./models/users.model.js";
 import memeModel from "./models/meme.model.js";
