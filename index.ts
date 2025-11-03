@@ -58,7 +58,7 @@ moodCallback(bot);
 randomCallback(bot);
 topMemesCallback(bot);
 
-app.use("/", (req,res) => {
+app.use("/test", (req,res) => {
   res.send("APPLICATION IS WORKING CURRENLY !");
 })
 
@@ -113,17 +113,10 @@ cron.schedule("0 8 * * *", async () => {
   }
 });
 
-console.log(process.env.NODE_ENV, "NODE_ENV");
+const PORT = process.env.PORT || 3000;
 
-if (process.env.NODE_ENV === "production") {
-  const DOMAIN = process.env.WEBHOOK_DOMAIN!;
-  const PORT = Number(process.env.PORT) || 3000;
+app.listen(PORT, () => {
+  console.log(`API IS CURRENTLY WORKING ON ${PORT} PORT`)
+})
 
-  const path = `/webhook/${bot.secretPathComponent()}`;
-
-  bot.telegram.setWebhook(`${DOMAIN}${path}`);
-  app.use(bot.webhookCallback(path));
-  app.listen(PORT, () => console.log(`✅ Webhook server running on ${PORT}`));
-} else {
-  bot.launch().then(() => console.log("Bot is running in development mode 🚀"));
-}
+bot.launch().then(() => console.log("Bot is running in development mode 🚀"))
